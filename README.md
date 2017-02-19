@@ -1,6 +1,6 @@
 # PresentationRevieingSystem
 Group Presentation Reviewing Online System to evaluate group presentations 
-
+Develped using Node.js
 1. Install NodeJS and npm
 2. Execute 'npm install' to create the node_modules folder and install all
 the required modules from package.json
