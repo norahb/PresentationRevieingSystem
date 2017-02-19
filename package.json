@@ -1,0 +1,21 @@
+{
+  "name": "GroupJob",
+  "description": "Presentation Reviewing system",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "",
+    "socket.io": "",
+	"socket.io-client":"",
+    "bytes": "https://registry.npmjs.org/bytes/-/bytes-2.0.0.tgz"
+  },
+   "scripts": {
+    "start": "node server.js",
+    "test": "mocha --reporter spec ./test/testApp.js"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.2",
+    "should": "^7.1.0",
+    "supertest": "^1.1.0",
+    "chai":"*"
+  }
+}

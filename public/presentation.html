@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<!--
+Template Name: Abele
+Author: <a href="http://www.os-templates.com/">OS Templates</a>
+Author URI: http://www.os-templates.com/
+Licence: Free to use under our free template licence terms
+Licence URI: http://www.os-templates.com/template-terms
+-->
+<html>
+<head>
+<title>GroupJob | Presentation </title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
+</head>
+<body id="top" onload="initPage()">
+<!-- ################################################################################################ -->
+<div id="h1" class="wrapper row0">
+  <div id="topbar" class="clear"> 
+    <!-- ################################################################################################ -->
+    <div class="fl_left">
+    </div>
+    <div class="fl_right">
+      <ul class="nospace linklist">
+        <li><i class="fa fa-phone"></i> +00 (000) 000 0000</li>
+        <li><i class="fa fa-envelope-o"></i> info@domain.com</li>
+      </ul>
+    </div>
+    <!-- ################################################################################################ -->
+  </div>
+</div>
+<!-- ################################################################################################ -->
+<div id="h2" class="wrapper row1">
+  <header id="header" class="clear"> 
+    <!-- ################################################################################################ -->
+    <div id="logo" class="fl_left">
+      <h1><a href="index">GroupJob</a></h1>
+    </div>
+   </header>
+</div>
+<!-- ################################################################################################ -->
+<div id="h3" class="wrapper row3">
+  <main class="container clear"> 
+    <!-- main body -->
+    <!-- ################################################################################################ -->
+    <!-- Upload Files Form -->
+	<form id="formppt" action="/uploadFiles" method="post" enctype="multipart/form-data" name="ajaxUploadForm">
+    <label style="color:red;">You need to export the presentation to images</label>
+	<input type="file" id="upfile" multiple="multiple" accept="image/*" name="uploadedImages"/><br/>
+    <input type="submit" value="Upload" class="btn" />
+  </form>
+  
+	<p id="code" style="font-size: 1.5em; font-weight: bold;">Presentation Code: </p>
+	<input id="start" type="button" class="btn" value="Start the Presentation" onclick="start()" style="display:none;"/>
+	<br>
+	
+	<!-- Presentation Area -->
+	<table>
+	<tr>
+	<td><img id="pic2" alt="Presentaion Slide" src="images/11.jpg" class="wrapper row2 bgded" style="width: 100%; height: auto; display:none;"/></td>
+     </tr>
+	</table>
+	
+	<!-- Flow Contorls -->
+	<div id="controls" class="one_half" style="display:none;float:right;">
+  <a href="#" onclick="slideshowBack(); return false;"><img src="images/prev.png" alt="Previous" title="Previous" /></a>
+  <a href="#" onclick="slideshowUp(); return false;"><img src="images/next.png" alt="Next" title="Next" /></a>
+ <a href="#" onClick="slideshowHome(); return false;"><img src="images/home.png" alt="Home" title="Home" /></a>
+		</div>
+		<br>
+		<input type="button" id="review" class="btn" value="Review &nbsp;" onclick="reviewComm()" style="display:none;" />
+		<input type ="button" id="save" class="btn" value="Save Comments" onclick="saveComments('Comments.txt', 'text/plain')" style="display:none; float:right;" />
+	<br>
+		
+	  	  <div id="commentsSection">
+        <h2>Comments</h2>
+        <ul id="comments">
+        </ul>
+      </div>
+          <!-- / main body -->
+    <div class="clear"></div>
+  </main>
+  </div>
+
+<div class="wrapper row6">
+  <div id="copyright" class="clear"> 
+    <!-- ################################################################################################ -->
+    <p class="fl_left">Copyright &copy; 2015 - All Rights Reserved - <a href="#">Domain Name</a></p>
+    <p class="fl_right">Template by <a target="_blank" href="http://www.os-templates.com/" title="Free Website Templates">OS Templates</a></p>
+    <!-- ################################################################################################ -->
+  </div>
+</div>
+<!-- JAVASCRIPTS -->
+<script src="app.js" type="text/javascript" ></script>
+<script src="../layout/scripts/jquery.min.js"></script> 
+<script src="../layout/scripts/jquery.mobilemenu.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> 
+
+<script>
+// Establish client socket.io
+var socket = io(),
+
+imgArray=[],
+num=0,
+review = false,
+comments=[];
+var text = "Commments"+ "\r\n";
+
+// Code to detect selected files from http://stackoverflow.com/users/128165/gaby-aka-g-petrioli
+var file = document.getElementById('upfile');
+
+file.onchange = function(e){ 
+    var ext = this.value.match(/\.(.+)$/)[1].toLowerCase();
+    switch(ext)
+    {
+        case 'jpg':
+        case 'bmp':
+        case 'png':
+        case 'tif':
+		case 'git':
+            break;
+        default:
+            alert('Please upload Images');
+            this.value='';
+    }
+};
+
+// When start presentation remove form, and emit display ppt event
+function start(){
+	document.getElementById('start').style.display="none";
+	document.getElementById('controls').style.display="block";
+	document.getElementById('h1').style.display="none";
+	document.getElementById('h2').style.display="none";
+	socket.emit('dislay ppt' , 'dis');
+}
+
+// Get images source
+socket.on('dislay ppt', function(msg){
+		imgArray=msg;
+		slideshow(0);
+		});
+
+// Code for image slideshow was found on the Internet
+function slideshow(slide_num) {
+	var content='';
+	$('#comments').empty();
+	document.getElementById('pic2').src=imgArray[slide_num]; 
+	document.getElementById('pic2').style.display="block";
+	socket.emit('change slide', slide_num);
+	
+	// Display Review button at the end of presentation
+	if(slide_num === imgArray.length-1)
+		document.getElementById('review').style.display = "block";
+	
+	// To save comments in object content and then display those comments in comment area
+	// To save comments to text object to be saved in text file
+	if(review)
+	{
+		for( var i = 0; i < comments.length ; i++)
+		{ if(comments[i][1] === slide_num){
+					content += '<li><h3>' + comments[i][0] + '</h3>';
+					content += '<p>' + comments[i][2] + '</p></li>';
+					text += "\r\n Slide:" + slide_num + "\r\n" + comments[i][0] + "\r\n";
+					text += comments[i][2] + "\r\n";
+				}
+		}
+		$('#comments').append(content); 	
+	}
+}
+
+// To go to next slide
+function slideshowUp() {
+  num++;
+  num = num % imgArray.length;
+  slideshow(num);
+}
+
+// To go to previous slide
+function slideshowBack() {
+  num--;
+  if (num < 0) {num=imgArray.length-1;}
+  num = num % imgArray.length;
+  slideshow(num);
+}
+
+// To go to first slide
+function slideshowHome() {
+	num = 0;
+	slideshow(num);
+}	
+
+// To detect arrow keys pressing	
+document.onkeydown = function() {
+	switch (window.event.keyCode) {
+		case 37:
+		slideshowBack(); 
+		break;
+		case 39:
+		slideshowUp();
+		break;
+	}
+};
+		
+// When user press review, It emit display comment event
+function reviewComm(){
+		socket.emit('display comment', 'display');
+		document.getElementById('save').style.display = "block";
+	}
+
+// Get users comments from the server
+socket.on('display comment' , function(num){
+	 comments  = num ;
+	 review = true;
+	 slideshowHome();
+});
+
+// To save all comments in text file in user's device
+function saveComments(name, type) {
+	var aFileParts = text;
+	var a = document.createElement("a");
+    var file = new Blob([aFileParts], {type: type});
+    a.href = URL.createObjectURL(file);
+    a.download = name;
+    a.click();
+}
+
+
+</script>
+
+</body>
+</html>
